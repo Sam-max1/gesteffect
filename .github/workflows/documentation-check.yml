@@ -1,0 +1,31 @@
+name: Documentation Check
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Check documentation files exist
+      run: |
+        echo "Checking documentation files..."
+        test -f README.md && echo "✓ README.md exists" || echo "✗ README.md missing"
+        test -f QUICK_START.md && echo "✓ QUICK_START.md exists" || echo "✗ QUICK_START.md missing"
+        test -f GESTEFFECT_DESIGN_ARCHITECTURE.md && echo "✓ GESTEFFECT_DESIGN_ARCHITECTURE.md exists" || echo "✗ GESTEFFECT_DESIGN_ARCHITECTURE.md missing"
+        test -f LICENSE && echo "✓ LICENSE exists" || echo "✗ LICENSE missing"
+        test -f CONTRIBUTING.md && echo "✓ CONTRIBUTING.md exists" || echo "✗ CONTRIBUTING.md missing"
+    
+    - name: Check required files
+      run: |
+        echo "Checking project files..."
+        test -f app.py && echo "✓ app.py exists" || (echo "✗ app.py missing" && exit 1)
+        test -f requirements.txt && echo "✓ requirements.txt exists" || (echo "✗ requirements.txt missing" && exit 1)
+        test -d templates && echo "✓ templates/ exists" || (echo "✗ templates/ missing" && exit 1)
+        test -d static && echo "✓ static/ exists" || (echo "✗ static/ missing" && exit 1)

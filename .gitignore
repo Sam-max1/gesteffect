@@ -1,0 +1,90 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Virtual environments
+venv/
+env/
+.venv
+.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.sublime-project
+*.sublime-workspace
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# Flask
+instance/
+.webassets-cache
+*.db
+
+# MediaPipe cache
+*.mediapipe
+
+# Videos and recordings
+*.mp4
+*.avi
+*.mov
+*.mkv
+*.webm
+output.mp4
+output.avi
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+.directory
+
+# Project specific
+local_llm_test*
+*.json.bak
+ai_workbench*
+videoplayback*
+*.whl
+__pycache__/
+
+# Camera/Video files
+/videos/
+/recordings/
+/tmp/

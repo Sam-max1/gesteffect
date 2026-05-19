@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GestEffect - AR Hand Tracking</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="video-container">
+        <img id="videoFeed" src="/video_feed" alt="Video Feed">
+        
+        <!-- Top-Left Stats Panel 1 -->
+        <div class="stats-panel-top">
+            <div class="stat-row">
+                <span class="stat-label">Hands Detected:</span>
+                <span class="stat-value" id="handCount">0</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">FPS:</span>
+                <span class="stat-value" id="fps">0</span>
+            </div>
+        </div>
+        
+        <!-- Top-Left Stats Panel 2 -->
+        <div class="stats-panel-middle">
+            <div class="stat-row">
+                <span class="stat-label">Gesture:</span>
+                <span class="stat-value gesture-text" id="gesture">Unknown</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Spread:</span>
+                <span class="stat-value" id="spread">0%</span>
+            </div>
+        </div>
+        
+        <!-- Bottom-Center Theme Selector -->
+        <div class="theme-selector">
+            <button class="theme-btn active" data-theme="Rainbow">
+                <span class="theme-icon">🌈</span>
+                <span class="theme-name">Rainbow</span>
+            </button>
+            <button class="theme-btn" data-theme="Cyberpunk">
+                <span class="theme-icon">🌃</span>
+                <span class="theme-name">Cyberpunk</span>
+            </button>
+            <button class="theme-btn" data-theme="Lava">
+                <span class="theme-icon">🔥</span>
+                <span class="theme-name">Lava</span>
+            </button>
+            <button class="theme-btn" data-theme="Ocean">
+                <span class="theme-icon">🌊</span>
+                <span class="theme-name">Ocean</span>
+            </button>
+            <button class="theme-btn" data-theme="Galaxy">
+                <span class="theme-icon">🌌</span>
+                <span class="theme-name">Galaxy</span>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Initialize theme from server
+        async function initializeTheme() {
+            try {
+                const response = await fetch('/get_theme');
+                const data = await response.json();
+                updateActiveThemeButton(data.theme);
+            } catch (error) {
+                console.error('Failed to get theme:', error);
+            }
+        }
+
+        // Update theme when button is clicked
+        document.querySelectorAll('.theme-btn').forEach(button => {
+            button.addEventListener('click', async function() {
+                const theme = this.dataset.theme;
+                
+                try {
+                    const response = await fetch('/update_theme', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ theme: theme })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.status === 'success') {
+                        updateActiveThemeButton(theme);
+                    }
+                } catch (error) {
+                    console.error('Failed to update theme:', error);
+                }
+            });
+        });
+
+        // Update active theme button styling
+        function updateActiveThemeButton(theme) {
+            document.querySelectorAll('.theme-btn').forEach(btn => {
+                if (btn.dataset.theme === theme) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+        }
+
+        // Update stats periodically
+        async function updateStats() {
+            try {
+                const response = await fetch('/get_stats');
+                const data = await response.json();
+                
+                document.getElementById('fps').textContent = data.fps;
+                document.getElementById('handCount').textContent = data.hand_count;
+                
+                // Update gesture and spread for first hand
+                if (data.hand_count > 0) {
+                    document.getElementById('gesture').textContent = data.gestures[0];
+                    document.getElementById('spread').textContent = Math.round(data.spreads[0]) + '%';
+                    
+                    // Update gesture color based on gesture type
+                    const gestureElement = document.getElementById('gesture');
+                    gestureElement.classList.remove('gesture-pinch', 'gesture-fist', 'gesture-open');
+                    
+                    if (data.gestures[0] === 'PINCH!') {
+                        gestureElement.classList.add('gesture-pinch');
+                    } else if (data.gestures[0] === 'Fist') {
+                        gestureElement.classList.add('gesture-fist');
+                    } else if (data.gestures[0] === 'Open Hand') {
+                        gestureElement.classList.add('gesture-open');
+                    }
+                } else {
+                    document.getElementById('gesture').textContent = 'Unknown';
+                    document.getElementById('spread').textContent = '0%';
+                }
+            } catch (error) {
+                console.error('Failed to update stats:', error);
+            }
+        }
+
+        // Initialize
+        window.addEventListener('DOMContentLoaded', () => {
+            initializeTheme();
+            // Update stats every 100ms
+            setInterval(updateStats, 100);
+        });
+    </script>
+</body>
+</html>
