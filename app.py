@@ -145,8 +145,10 @@ class FrameProcessor:
         # Draw main line
         cv2.line(frame, pt1, pt2, color, thickness)
         
-        # Draw bright core
-        core_color = THEME_COLORS[current_theme]["glow_core"]
+        # Draw bright core — read current_theme under lock (Bug 2 fix: was accessed without lock)
+        with theme_lock:
+            theme = current_theme
+        core_color = THEME_COLORS[theme]["glow_core"]
         cv2.line(frame, pt1, pt2, core_color, 1)
     
     def draw_hand_landmarks(self, frame, hand_landmarks, handedness, hand_index):
@@ -231,8 +233,9 @@ class FrameProcessor:
         """Process a single frame."""
         self.update_fps()
         
-        h, frame_width = frame.shape[:2]
-        h, frame_height = frame.shape[:2]
+        # Bug 1 fix: frame.shape[:2] returns (height, width); previous code double-assigned
+        # both variables from the same expression, swapping the values.
+        frame_height, frame_width = frame.shape[:2]
         
         # Flip frame horizontally for selfie view
         frame = cv2.flip(frame, 1)

@@ -87,8 +87,9 @@ processor     = FrameProcessor() # Singleton; holds FPS, gesture, spread state
 
 > **Note**: `current_theme` is accessed from both the Flask request thread
 > (`/update_theme`, `/get_stats`) and the frame generator thread. The `theme_lock`
-> prevents torn reads/writes. However, `draw_neon_line()` at line 149 accesses
-> `current_theme` *without* the lock — this is a thread-safety gap.
+> prevents torn reads/writes. The `draw_neon_line()` method at line 149 previously
+> accessed `current_theme` without the lock — **this has been fixed** by reading the
+> theme under lock at the start of `draw_neon_line()` and using the local copy.
 
 ---
 
@@ -169,10 +170,9 @@ Three-pass neon line rendering:
 2. **Main line**: `color` at `thickness` — solid coloured line
 3. **Bright core**: `(255,255,255)` at 1px — white centre highlight
 
-> **Known Issue** (line 149): `THEME_COLORS[current_theme]["glow_core"]` accesses
-> `current_theme` directly without `theme_lock`. If a theme switch races with frame
-> rendering, this could cause a `KeyError`. Fix: read theme under lock at the start
-> of `draw_hand_landmarks()` and pass it through.
+> **Fixed** (line 149): `THEME_COLORS[current_theme]["glow_core"]` previously accessed
+> `current_theme` directly without `theme_lock`. Now reads theme under lock at the
+> start of `draw_neon_line()` using a local copy, consistent with all other accesses.
 
 ---
 
@@ -222,16 +222,14 @@ Main pipeline entry point:
 8. Draws text overlay
 9. Returns processed frame
 
-> **Known Bug** (lines 234–235): Shape unpack is wrong:
+> **Fixed** (lines 234–235): Shape unpack was wrong — `frame.shape[:2]` returns
+> `(height, width)`. The previous double-assignment pattern:
 > ```python
-> h, frame_width  = frame.shape[:2]   # frame_width gets height value
-> h, frame_height = frame.shape[:2]   # frame_height gets width value
+> h, frame_width  = frame.shape[:2]   # frame_width got the height value
+> h, frame_height = frame.shape[:2]   # frame_height got the width value
 > ```
-> Correct form: `frame_height, frame_width = frame.shape[:2]`
-> Impact: `frame_width` and `frame_height` are swapped in `process_frame()`.
-> However, the background overlay rectangle uses `(frame_width, frame_height)`
-> which is still drawn correctly as long as the overlay covers the whole frame.
-> The MediaPipe and landmark drawing use `frame.shape[:2]` directly (correct).
+> Has been corrected to: `frame_height, frame_width = frame.shape[:2]`
+> The background overlay rectangle and all downstream logic now receive correct values.
 
 ---
 
@@ -439,39 +437,42 @@ setInterval(100ms)
 
 ## Known Issues & Audit Findings
 
-### Bug 1 — `process_frame()` lines 234–235: Shape dimensions swapped
+> [!NOTE]
+> All bugs identified during the initial audit have been fixed in the current codebase.
+
+### Bug 1 (Fixed) — `process_frame()` lines 234–235: Shape dimensions swapped
 
 ```python
-# CURRENT (incorrect):
-h, frame_width  = frame.shape[:2]   # frame_width actually gets height
-h, frame_height = frame.shape[:2]   # frame_height actually gets width
+# WAS (incorrect):
+h, frame_width  = frame.shape[:2]   # frame_width actually got height
+h, frame_height = frame.shape[:2]   # frame_height actually got width
 
-# CORRECT:
+# FIXED:
 frame_height, frame_width = frame.shape[:2]
 ```
 
-**Impact**: `frame_width` and `frame_height` are assigned swapped values in `process_frame()`.
-The black overlay rectangle `(0,0) → (frame_width, frame_height)` still covers the whole frame
-(since both values come from the same shape), but any code relying on correct width/height
-distinction in this scope would behave incorrectly.
+**Impact**: `frame_width` and `frame_height` were assigned swapped values in `process_frame()`.
+The black overlay rectangle `(0,0) → (frame_width, frame_height)` still covered the whole frame
+(since both values came from the same shape), but any code relying on correct width/height
+distinction in this scope would have behaved incorrectly.
 
 ---
 
-### Issue 2 — `draw_neon_line()` line 149: `current_theme` read without lock
+### Issue 2 (Fixed) — `draw_neon_line()` line 149: `current_theme` read without lock
 
 ```python
-# CURRENT (no lock):
+# WAS (no lock):
 core_color = THEME_COLORS[current_theme]["glow_core"]
 
-# SAFE form:
+# FIXED:
 with theme_lock:
     theme = current_theme
 core_color = THEME_COLORS[theme]["glow_core"]
 ```
 
 **Impact**: In CPython, string assignment is effectively atomic due to the GIL, making a
-`KeyError` extremely unlikely in practice. However, the pattern is inconsistent with the
-rest of the code which always locks `current_theme` access.
+`KeyError` extremely unlikely in practice. However, the pattern was inconsistent with the
+rest of the code which always locks `current_theme` access. Now consistent.
 
 ---
 
