@@ -88,3 +88,13 @@ __pycache__/
 /videos/
 /recordings/
 /tmp/
+
+# Scratch / implementation notes (not for publication)
+DELIVERY_SUMMARY.md
+GITHUB_READY.md
+GITHUB_SETUP.md
+IMPLEMENTATION_COMPLETE.md
+INDEX.md
+PROJECT_MANIFEST.md
+PUBLISHING_TO_GITHUB.md
+QUICK_START.md

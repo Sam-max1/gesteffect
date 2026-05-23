@@ -1,54 +1,83 @@
-# GestEffect - Real-time AR Hand Tracking Web Application
+# 🖐️ GestEffect — Real-time AR Hand Tracking Web App
 
-A modern, interactive web application that tracks hands in real-time using your webcam and displays neon-styled visualizations with gesture recognition, powered by Python, Flask, and MediaPipe.
+> A browser-based augmented reality application that tracks hands via webcam, recognises gestures, and renders live neon visual effects — powered by Python, Flask, MediaPipe, and OpenCV.
 
-![Status](https://img.shields.io/badge/status-production%20ready-brightgreen)
-![Python](https://img.shields.io/badge/python-3.8+-blue)
-![License](https://img.shields.io/badge/license-MIT-green)
+[![Python](https://img.shields.io/badge/Python-3.8%2B-blue?logo=python)](https://python.org)
+[![Flask](https://img.shields.io/badge/Flask-3.0-lightgrey?logo=flask)](https://flask.palletsprojects.com/)
+[![MediaPipe](https://img.shields.io/badge/MediaPipe-0.10-orange)](https://mediapipe.dev/)
+[![OpenCV](https://img.shields.io/badge/OpenCV-4.8-green?logo=opencv)](https://opencv.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-## 🎯 Features
+---
 
-- **Real-time Hand Detection**: Tracks up to 2 hands simultaneously
-- **Gesture Recognition**: Detects PINCH, FIST, and OPEN HAND gestures
-- **Hand Spread Metric**: Displays how spread/open your hand is (0-100%)
-- **Neon Visual Effects**: Glowing wireframes and multi-hand connections
-- **5 Theme Modes**: Rainbow, Cyberpunk, Lava, Ocean, Galaxy
-- **Glassmorphism UI**: Modern frosted glass effect panels
-- **Real-time Statistics**: FPS, hand count, and gesture feedback
-- **Responsive Design**: Works on desktop, tablet, and mobile
+## Overview
 
-## 🛠️ Tech Stack
+GestEffect streams your webcam feed through a Python processing pipeline that:
+1. Detects up to **2 hands simultaneously** using MediaPipe
+2. Extracts **21 landmarks** per hand and recognises **3 gestures** (PINCH, FIST, OPEN HAND)
+3. Renders **neon glowing wireframes** and **inter-hand connections** over a darkened background
+4. Streams the annotated frames to your browser as a live **MJPEG video feed**
+5. Provides a **glassmorphism UI** with real-time stats and 5 switchable colour themes
 
-- **Backend**: Python 3.8+, Flask, OpenCV, MediaPipe
-- **Frontend**: HTML5, CSS3 (Glassmorphism), Vanilla JavaScript
-- **Streaming**: MJPEG multipart stream format
-- **Processing**: Real-time hand tracking and gesture recognition
+---
 
-## 📋 Requirements
+## Features
 
-- Python 3.8 or higher
-- Webcam (USB or integrated)
-- Modern web browser (Chrome, Firefox, Safari, Edge)
-- ~500MB free disk space (for dependencies)
-- GPU optional (recommended for faster processing)
+| Feature | Details |
+|---------|---------|
+| 🖐️ Hand Tracking | Up to 2 hands, 21 landmarks each via MediaPipe |
+| 👌 Gesture Recognition | PINCH, FIST, OPEN HAND with pixel-distance thresholds |
+| 📊 Hand Spread Metric | 0–100% spread from palm centre to fingertips |
+| 🌈 5 Neon Themes | Rainbow, Cyberpunk, Lava, Ocean, Galaxy |
+| ✨ Multiverse Connections | Lines between matching fingertips of both hands |
+| 📡 MJPEG Streaming | Low-latency browser video without WebRTC |
+| 🎛️ Live Stats UI | FPS, hand count, gesture, spread — polled every 100ms |
+| 📱 Responsive Design | Glassmorphism panels scale to mobile and tablet |
 
-## 🚀 Quick Start
+---
 
-### 1. Installation
+## Tech Stack
 
-Clone or download the project:
+| Layer | Technology |
+|-------|-----------|
+| Backend | Python 3.8+, Flask 3.0, OpenCV 4.8 |
+| Computer Vision | MediaPipe 0.10 (hand landmark detection) |
+| Streaming | MJPEG multipart/x-mixed-replace |
+| Frontend | HTML5, Vanilla CSS3 (glassmorphism), Vanilla JavaScript |
+
+---
+
+## Requirements
+
+- Python **3.8** or higher
+- A **webcam** (USB or integrated) — `/dev/video0` on Linux, default device on Windows/macOS
+- A modern browser (Chrome, Firefox, Safari, Edge)
+- ~500MB disk space for Python dependencies
+
+GPU is **optional** — MediaPipe runs on CPU, but GPU significantly improves FPS.
+
+---
+
+## Installation
+
 ```bash
+# 1. Clone the repository
+git clone https://github.com/imaxx2/gesteffect.git
 cd gesteffect
-```
 
-Install dependencies:
-```bash
+# 2. (Optional) Create a virtual environment
+python -m venv venv
+source venv/bin/activate      # Linux/macOS
+# venv\Scripts\activate       # Windows
+
+# 3. Install dependencies
 pip install -r requirements.txt
 ```
 
-### 2. Run the Application
+---
 
-Start the Flask server:
+## Quick Start
+
 ```bash
 python app.py
 ```
@@ -60,104 +89,75 @@ Available themes: ['Rainbow', 'Cyberpunk', 'Lava', 'Ocean', 'Galaxy']
  * Running on http://0.0.0.0:5000
 ```
 
-### 3. Access the Web UI
+Open your browser at: **http://localhost:5000**
 
-Open your browser and navigate to:
-```
-http://localhost:5000
-```
+---
 
-**That's it!** Your webcam feed should now appear with hand tracking enabled.
+## Gestures
 
-## 🎮 How to Use
+| Gesture | Trigger | UI Colour |
+|---------|---------|-----------|
+| **PINCH!** | Thumb tip → Index tip distance < 50px | 🩷 Pink |
+| **Fist** | All fingertip distances from palm < 80px | 🟠 Orange |
+| **Open Hand** | Default (neither pinch nor fist) | 🩵 Cyan |
 
-### Gestures
+---
 
-1. **PINCH**: Bring your thumb and index finger close together
-   - Color: Pink
-   - Use for: Selecting, grabbing
+## Themes
 
-2. **FIST**: Close your hand into a fist
-   - Color: Orange
-   - Use for: Powering actions, closing
+Click any button in the bottom-centre theme bar:
 
-3. **OPEN HAND**: Keep your hand open and spread
-   - Color: Cyan
-   - Use for: Normal state, dragging
+| Button | Theme | Colours |
+|--------|-------|---------|
+| 🌈 | Rainbow | Cycles Blue → Green → Red |
+| 🌃 | Cyberpunk | Neon Pink + Cyan (default) |
+| 🔥 | Lava | Red + Orange + Yellow |
+| 🌊 | Ocean | Teal + Light Blue |
+| 🌌 | Galaxy | Deep Purple + Magenta + White |
 
-### Theme Selection
+Themes update live on the next processed frame — no page reload needed.
 
-Click any theme button at the bottom of the screen:
-- 🌈 **Rainbow** - Cycles through vibrant colors
-- 🌃 **Cyberpunk** - Neon pink and cyan
-- 🔥 **Lava** - Hot reds, oranges, yellows
-- 🌊 **Ocean** - Cool teals and light blues
-- 🌌 **Galaxy** - Deep purples and magentas
+---
 
-The theme changes instantly as you move your hands!
-
-## 📊 UI Elements
-
-### Top-Left Panels
-- **Panel 1**: Shows "Hands Detected" count and "FPS" (frames per second)
-- **Panel 2**: Shows current "Gesture" and "Spread" percentage
-
-### Bottom-Center
-- **Theme Selector**: 5 themed buttons with emoji icons
-- Active button highlights with a glowing effect
-
-## ⚙️ Configuration
-
-Edit `app.py` to customize:
-
-```python
-# Camera settings (line ~60)
-cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)  # Width
-cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)  # Height
-cap.set(cv2.CAP_PROP_FPS, 30)             # Frames per second
-
-# Gesture thresholds (line ~30)
-PINCH_THRESHOLD = 50      # Distance in pixels for pinch detection
-FIST_THRESHOLD = 80       # Distance in pixels for fist detection
-
-# MediaPipe settings (line ~16)
-max_num_hands=2                    # Number of hands to track
-min_detection_confidence=0.5       # Detection confidence (0-1)
-min_tracking_confidence=0.5        # Tracking confidence (0-1)
-```
-
-## 📁 File Structure
+## Project Structure
 
 ```
 gesteffect/
-├── app.py                              # Flask backend & processing
+├── app.py                              # Flask backend & frame processing pipeline
 ├── requirements.txt                    # Python dependencies
 ├── templates/
-│   └── index.html                      # Web UI
+│   └── index.html                      # Browser UI (Jinja2 template)
 ├── static/
-│   └── style.css                       # Styling
-├── GESTEFFECT_DESIGN_ARCHITECTURE.md  # Detailed documentation
+│   └── style.css                       # Glassmorphism styling & responsive layout
+├── .github/
+│   └── workflows/
+│       ├── python-check.yml            # Python syntax CI check
+│       └── documentation-check.yml    # Documentation CI check
+├── GESTEFFECT_DESIGN_ARCHITECTURE.md  # Full architecture & code audit
+├── CONTRIBUTING.md                     # Contribution guidelines
+├── CODE_OF_CONDUCT.md                  # Community standards
+├── SECURITY.md                         # Security policy
+├── LICENSE                             # MIT License
 └── README.md                           # This file
 ```
 
-## 🖥️ API Endpoints
+---
 
-| Endpoint | Method | Purpose |
-|----------|--------|---------|
-| `/` | GET | Serve main page |
-| `/video_feed` | GET | Stream video frames (MJPEG) |
-| `/get_theme` | GET | Get current theme name |
-| `/update_theme` | POST | Update active theme |
-| `/get_stats` | GET | Get FPS, hand count, gestures, spreads |
+## API Endpoints
 
-### Example API Usage
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/` | GET | Serves `index.html` |
+| `/video_feed` | GET | MJPEG stream (`multipart/x-mixed-replace`) |
+| `/get_theme` | GET | Returns current theme + available themes |
+| `/update_theme` | POST | Switches active theme (thread-safe) |
+| `/get_stats` | GET | Returns FPS, hand count, gestures, spreads |
 
-Get current stats:
+### Example: Get Stats
+
 ```bash
 curl http://localhost:5000/get_stats
 ```
-
-Response:
 ```json
 {
   "fps": 28,
@@ -167,174 +167,165 @@ Response:
 }
 ```
 
-Update theme:
+### Example: Switch Theme
+
 ```bash
 curl -X POST http://localhost:5000/update_theme \
   -H "Content-Type: application/json" \
   -d '{"theme": "Lava"}'
 ```
-
-## 📈 Performance
-
-- **Frame Rate**: 25-30 FPS on modern hardware
-- **Latency**: ~100-150ms end-to-end
-- **CPU Usage**: 15-40% (depending on resolution and CPU)
-- **GPU Usage**: Significantly faster with CUDA-enabled GPU
-
-### Optimizations
-- 1280×720 resolution balances quality and speed
-- MJPEG streaming for efficient bandwidth
-- Thread-safe operations prevent race conditions
-- Generator-based frame streaming for memory efficiency
-
-## 🐛 Troubleshooting
-
-### No hands detected
-- Ensure adequate lighting
-- Move hands into view of webcam
-- Adjust `min_detection_confidence` lower in `app.py` (line ~18)
-
-### Laggy video stream
-- Reduce camera resolution: change `cv2.CAP_PROP_FRAME_WIDTH/HEIGHT`
-- Close other applications
-- Enable GPU acceleration if available
-- Lower FPS target (change `CAP_PROP_FPS`)
-
-### Theme not changing
-- Check browser console (F12) for errors
-- Verify Flask is running without errors
-- Try refreshing the page
-
-### High CPU usage
-- Reduce resolution to 640×480
-- Lower FPS to 20
-- Close background applications
-- Use GPU acceleration
-
-### Webcam not found
-- Check webcam is connected
-- Verify permissions: `ls -la /dev/video0`
-- Try changing `cv2.VideoCapture(0)` to `cv2.VideoCapture(1)` if multiple cameras
-
-## 🎨 Color Palettes Reference
-
-All colors in BGR format (OpenCV standard):
-
-| Theme | Color 1 | Color 2 | Color 3 |
-|-------|---------|---------|---------|
-| Rainbow | Blue (255,0,0) | Green (0,255,0) | Red (0,0,255) |
-| Cyberpunk | Pink (147,20,255) | Cyan (255,255,0) | - |
-| Lava | Red (0,0,255) | Orange (0,165,255) | Yellow (0,255,255) |
-| Ocean | Teal (200,255,0) | Light Blue (255,200,0) | - |
-| Galaxy | Purple (255,0,150) | Magenta (255,0,255) | White (255,255,255) |
-
-## 📱 Browser Compatibility
-
-| Browser | Support | Notes |
-|---------|---------|-------|
-| Chrome/Chromium | ✅ Full | Recommended |
-| Firefox | ✅ Full | Good performance |
-| Safari | ✅ Full | Works well |
-| Edge | ✅ Full | Good performance |
-| Mobile Browsers | ⚠️ Limited | UI responsive but performance varies |
-
-## 🔒 Security Notes
-
-- Application runs on `localhost:5000` by default (local only)
-- No data is transmitted externally
-- Webcam stream only processed locally
-- No recording or storage of video by default
-
-To access from other machines:
-```python
-# In app.py, change:
-app.run(host='0.0.0.0')  # Open to network
-# Or use a reverse proxy/tunneling solution
+```json
+{"status": "success", "theme": "Lava"}
 ```
-
-## 📚 Documentation
-
-For detailed architecture and implementation information, see:
-- [GESTEFFECT_DESIGN_ARCHITECTURE.md](GESTEFFECT_DESIGN_ARCHITECTURE.md)
-
-This includes:
-- System architecture diagrams
-- Hand landmark reference
-- Gesture recognition algorithms
-- Performance specifications
-- Data flow diagrams
-
-## 🚦 Advanced Features
-
-### Custom Gestures
-To add custom gestures, modify the `detect_gesture()` method in `FrameProcessor` class.
-
-### Custom Themes
-To add themes, update `THEME_COLORS` dictionary in `app.py`:
-```python
-"CustomTheme": {
-    "primary": [(B, G, R), (B, G, R)],
-    "secondary": (B, G, R),
-    "glow_core": (B, G, R)
-}
-```
-
-### Recording
-To record video, add to `generate_frames()`:
-```python
-out = cv2.VideoWriter('output.mp4', fourcc, fps, (width, height))
-out.write(processed_frame)  # After processing
-out.release()  # On exit
-```
-
-## 🤝 Contributing
-
-This is a standalone project. For improvements:
-1. Test thoroughly with your setup
-2. Document changes in code
-3. Ensure backward compatibility
-
-## 📝 License
-
-MIT License - Free for personal and commercial use
-
-## 🙏 Acknowledgments
-
-Built with:
-- **MediaPipe** by Google - Hand tracking & detection
-- **OpenCV** - Computer vision processing
-- **Flask** - Web framework
-- **Glassmorphism Design** - Modern UI inspiration
-
-## ⭐ Tips & Tricks
-
-1. **Better Detection**: Use uniform background, avoid extreme lighting
-2. **Smooth Gestures**: Move hands slowly for better tracking
-3. **Theme Switching**: Try different themes to find your favorite
-4. **Performance**: Run on modern hardware for best results
-5. **Mobile**: Responsive UI works on phones, but desktop recommended
-
-## 📞 Support
-
-If you encounter issues:
-1. Check the [Troubleshooting](#-troubleshooting) section
-2. Review [GESTEFFECT_DESIGN_ARCHITECTURE.md](GESTEFFECT_DESIGN_ARCHITECTURE.md)
-3. Check Flask console output for error messages
-4. Verify all dependencies are installed: `pip list`
-
-## 🔄 Updates
-
-Check back for:
-- Performance optimizations
-- Additional gesture types
-- More theme options
-- Mobile app versions
-- WebRTC support for streaming
 
 ---
 
-**Version**: 1.0  
-**Last Updated**: May 2026  
-**Status**: Production Ready ✨
+## Configuration
 
-Enjoy tracking with GestEffect! 🎉
+Edit `app.py` to tune the following constants:
+
+```python
+# Gesture detection thresholds (pixel distances)
+PINCH_THRESHOLD = 50   # thumb-index distance for PINCH recognition
+FIST_THRESHOLD  = 80   # max palm-to-fingertip distance for FIST recognition
+
+# Camera settings (in generate_frames())
+cap.set(cv2.CAP_PROP_FRAME_WIDTH,  1280)
+cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+cap.set(cv2.CAP_PROP_FPS,          30)
+
+# MediaPipe confidence thresholds
+min_detection_confidence = 0.5
+min_tracking_confidence  = 0.5
+max_num_hands            = 2
+```
+
+---
+
+## Performance
+
+| Metric | Typical Value |
+|--------|--------------|
+| Target FPS | 30 |
+| Achieved FPS | 25–30 (CPU), higher with GPU |
+| End-to-end latency | ~100–150ms |
+| Resolution | 1280×720 |
+| CPU usage | 15–40% (varies by hardware) |
+
+### Optimising Performance
+
+- **Reduce resolution**: `cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)` for faster processing
+- **Lower FPS target**: `cap.set(cv2.CAP_PROP_FPS, 20)` to reduce CPU load
+- **GPU acceleration**: Install `mediapipe-gpu` if you have CUDA support
+- **Single hand mode**: Set `max_num_hands=1` to halve landmark computation
+
+---
+
+## Colour Palette Reference
+
+All values in **BGR format** (OpenCV standard — note: reversed from RGB):
+
+| Theme | Color 1 (BGR) | Color 2 (BGR) | Color 3 (BGR) |
+|-------|---------------|---------------|---------------|
+| Rainbow | (255,0,0) Blue | (0,255,0) Green | (0,0,255) Red |
+| Cyberpunk | (147,20,255) Pink | (255,255,0) Cyan | — |
+| Lava | (0,0,255) Red | (0,165,255) Orange | (0,255,255) Yellow |
+| Ocean | (200,255,0) Teal | (255,200,0) Light Blue | — |
+| Galaxy | (255,0,150) Purple | (255,0,255) Magenta | (255,255,255) White |
+
+---
+
+## Troubleshooting
+
+| Symptom | Solution |
+|---------|---------|
+| **No hands detected** | Improve lighting; avoid backlit environments; try lowering `min_detection_confidence` |
+| **Laggy video stream** | Reduce resolution to 640×480; close background apps; lower FPS target |
+| **Theme not changing** | Open browser console (F12) for errors; verify Flask is running |
+| **High CPU usage** | Reduce resolution; enable GPU; lower FPS |
+| **Webcam not found** | Check `/dev/video0` permissions; try `cv2.VideoCapture(1)` if multiple cameras |
+| **MJPEG stream choppy** | Try Chrome (best MJPEG support); reduce JPEG quality in `imencode` call |
+
+---
+
+## Extending GestEffect
+
+### Add a Custom Gesture
+
+In `app.py`, add logic to `FrameProcessor.detect_gesture()`:
+
+```python
+# Example: Peace/Victory gesture (index + middle up, others down)
+def detect_gesture(self, landmarks, frame_width, frame_height):
+    ...
+    # Your landmark-based condition here
+    return "Peace ✌️"
+```
+
+### Add a Custom Theme
+
+Add an entry to `THEME_COLORS` in `app.py`, and a button in `templates/index.html`:
+
+```python
+"Neon Green": {
+    "primary": [(0, 255, 0), (0, 200, 50)],   # BGR
+    "secondary": (0, 80, 0),
+    "glow_core": (255, 255, 255)
+}
+```
+
+### Enable Video Recording
+
+In `generate_frames()`, after `processed_frame = processor.process_frame(frame)`:
+
+```python
+out = cv2.VideoWriter('output.mp4', cv2.VideoWriter_fourcc(*'mp4v'), 30, (1280, 720))
+out.write(processed_frame)
+# Call out.release() in the finally block
+```
+
+---
+
+## Security Notes
+
+- Flask runs on `0.0.0.0:5000` — accessible on your local network by default
+- No video data is transmitted externally or stored to disk
+- Theme updates are protected by `threading.Lock()` to prevent race conditions
+- For local-only access, change `host='0.0.0.0'` to `host='127.0.0.1'` in `app.py`
+
+---
+
+## Browser Compatibility
+
+| Browser | MJPEG Support | Notes |
+|---------|--------------|-------|
+| Chrome / Chromium | ✅ Full | Recommended |
+| Firefox | ✅ Full | Good performance |
+| Safari | ✅ Full | Works well |
+| Edge | ✅ Full | Good performance |
+| Mobile Browsers | ⚠️ Limited | UI is responsive; stream performance varies |
+
+---
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) for community standards.
+
+---
+
+## License
+
+MIT License — see [LICENSE](LICENSE) for details.
+
+---
+
+## Acknowledgements
+
+- [MediaPipe](https://mediapipe.dev/) by Google — hand landmark detection
+- [OpenCV](https://opencv.org/) — computer vision and video processing
+- [Flask](https://flask.palletsprojects.com/) — lightweight Python web framework
+- Glassmorphism design pattern for the frosted-glass UI aesthetic
+
+---
+
+**Version**: 1.0 | **Status**: Production Ready ✨ | **Last Updated**: May 2026
