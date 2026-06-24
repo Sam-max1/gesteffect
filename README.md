@@ -7,6 +7,8 @@
 [![MediaPipe](https://img.shields.io/badge/MediaPipe-0.10-orange)](https://mediapipe.dev/)
 [![OpenCV](https://img.shields.io/badge/OpenCV-4.8-green?logo=opencv)](https://opencv.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![GitHub Stars](https://img.shields.io/github/stars/imaxx2/gesteffect?style=social)](https://github.com/imaxx2/gesteffect)
+[![GitHub Forks](https://img.shields.io/github/forks/imaxx2/gesteffect?style=social)](https://github.com/imaxx2/gesteffect)
 
 ---
 
@@ -18,6 +20,27 @@ GestEffect streams your webcam feed through a Python processing pipeline that:
 3. Renders **neon glowing wireframes** and **inter-hand connections** over a darkened background
 4. Streams the annotated frames to your browser as a live **MJPEG video feed**
 5. Provides a **glassmorphism UI** with real-time stats and 5 switchable colour themes
+
+### Application Flow
+
+```mermaid
+graph LR
+    A["📹 Webcam Input"] -->|VideoCapture| B["🤖 MediaPipe<br/>Hand Detection"]
+    B -->|21 Landmarks| C["👌 Gesture<br/>Recognition"]
+    C -->|PINCH/FIST<br/>OPEN HAND| D["🎨 Frame<br/>Processing"]
+    D -->|Neon Effects<br/>Wireframes| E["📡 MJPEG<br/>Stream"]
+    E -->|HTTP Feed| F["🌐 Browser<br/>Display"]
+    G["🎛️ Theme<br/>Selector"] -->|Update| D
+    F -->|User Control| G
+    
+    style A fill:#ff6b6b,color:#fff
+    style B fill:#4ecdc4,color:#fff
+    style C fill:#95e1d3,color:#000
+    style D fill:#ffd93d,color:#000
+    style E fill:#6bcf7f,color:#fff
+    style F fill:#a8d8ff,color:#000
+    style G fill:#ff8c42,color:#fff
+```
 
 ---
 
@@ -329,3 +352,15 @@ MIT License — see [LICENSE](LICENSE) for details.
 ---
 
 **Version**: 1.0 | **Status**: Production Ready ✨ | **Last Updated**: May 2026
+
+---
+
+## 🌟 Support & Star This Repo!
+
+If you found this project helpful and inspiring, **please consider giving it a star**! ⭐️ 
+
+A star helps the project grow and reach more developers like you. It takes just a second and means a lot to the community:
+
+[![Star this repo](https://img.shields.io/badge/⭐_Star_this_Repo-Click_Here-yellow?style=for-the-badge&logo=github)](https://github.com/imaxx2/gesteffect/stargazers)
+
+**Thank you for supporting open-source development!** 🙏

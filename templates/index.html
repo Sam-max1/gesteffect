@@ -2,151 +2,76 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="GestEffect - Real-time AR hand tracking with neon effects and fireball powers">
     <title>GestEffect - AR Hand Tracking</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <div class="video-container">
-        <img id="videoFeed" src="/video_feed" alt="Video Feed">
-        
-        <!-- Top-Left Stats Panel 1 -->
+        <!-- Camera Permission Overlay -->
+        <div id="cameraOverlay" class="camera-overlay">
+            <div class="overlay-inner">
+                <div class="logo-glow">✋</div>
+                <h1>GestEffect AR</h1>
+                <p>Real-time neon hand tracking with magical powers — powered by MediaPipe running entirely in your browser.</p>
+                <button id="startCameraBtn" class="primary-btn"><span>Enable Camera</span></button>
+                <p class="hint">Works on mobile &amp; desktop · Portrait &amp; landscape</p>
+            </div>
+        </div>
+
+        <!-- Terminated Overlay -->
+        <div id="terminatedOverlay" class="camera-overlay" style="display: none;">
+            <div class="overlay-inner">
+                <div class="logo-glow" style="filter: drop-shadow(0 0 20px #ff0000);">🛑</div>
+                <h1 style="background: linear-gradient(90deg, #ff4444, #ff0000); -webkit-background-clip: text;">Terminated</h1>
+                <p>The backend server has been killed and the camera has been released.</p>
+                <p class="hint">Please restart the server from the console to continue.</p>
+            </div>
+        </div>
+
+        <video id="videoElement" autoplay playsinline muted style="display:none;"></video>
+        <canvas id="outputCanvas"></canvas>
+
+        <!-- Left Stats Panels -->
         <div class="stats-panel-top">
-            <div class="stat-row">
-                <span class="stat-label">Hands Detected:</span>
-                <span class="stat-value" id="handCount">0</span>
-            </div>
-            <div class="stat-row">
-                <span class="stat-label">FPS:</span>
-                <span class="stat-value" id="fps">0</span>
-            </div>
+            <div class="stat-row"><span class="stat-label">Hands</span><span class="stat-value" id="handCount">0</span></div>
+            <div class="stat-row"><span class="stat-label">FPS</span><span class="stat-value" id="fps">0</span></div>
         </div>
-        
-        <!-- Top-Left Stats Panel 2 -->
         <div class="stats-panel-middle">
-            <div class="stat-row">
-                <span class="stat-label">Gesture:</span>
-                <span class="stat-value gesture-text" id="gesture">Unknown</span>
-            </div>
-            <div class="stat-row">
-                <span class="stat-label">Spread:</span>
-                <span class="stat-value" id="spread">0%</span>
-            </div>
+            <div class="stat-row"><span class="stat-label">Gesture</span><span class="stat-value gesture-text" id="gesture">—</span></div>
+            <div class="stat-row"><span class="stat-label">Spread</span><span class="stat-value" id="spread">0%</span></div>
         </div>
-        
-        <!-- Bottom-Center Theme Selector -->
+
+        <!-- Right Theme Selector -->
         <div class="theme-selector">
-            <button class="theme-btn active" data-theme="Rainbow">
-                <span class="theme-icon">🌈</span>
-                <span class="theme-name">Rainbow</span>
-            </button>
-            <button class="theme-btn" data-theme="Cyberpunk">
-                <span class="theme-icon">🌃</span>
-                <span class="theme-name">Cyberpunk</span>
-            </button>
-            <button class="theme-btn" data-theme="Lava">
-                <span class="theme-icon">🔥</span>
-                <span class="theme-name">Lava</span>
-            </button>
-            <button class="theme-btn" data-theme="Ocean">
-                <span class="theme-icon">🌊</span>
-                <span class="theme-name">Ocean</span>
-            </button>
-            <button class="theme-btn" data-theme="Galaxy">
-                <span class="theme-icon">🌌</span>
-                <span class="theme-name">Galaxy</span>
-            </button>
+            <button class="theme-btn" data-theme="Rainbow"><span class="theme-icon">🌈</span><span class="theme-name">Rainbow</span></button>
+            <button class="theme-btn active" data-theme="Cyberpunk"><span class="theme-icon">🌃</span><span class="theme-name">Cyberpunk</span></button>
+            <button class="theme-btn" data-theme="Lava"><span class="theme-icon">🔥</span><span class="theme-name">Lava</span></button>
+            <button class="theme-btn" data-theme="Ocean"><span class="theme-icon">🌊</span><span class="theme-name">Ocean</span></button>
+            <button class="theme-btn" data-theme="Galaxy"><span class="theme-icon">🌌</span><span class="theme-name">Galaxy</span></button>
+            <button class="theme-btn" data-theme="Matrix"><span class="theme-icon">💻</span><span class="theme-name">Matrix</span></button>
+            <button class="theme-btn" data-theme="Frostbite"><span class="theme-icon">❄️</span><span class="theme-name">Frostbite</span></button>
+            <button class="theme-btn" data-theme="GoldenHour"><span class="theme-icon">🌅</span><span class="theme-name">GoldenHour</span></button>
+            <button class="theme-btn" data-theme="Synthwave"><span class="theme-icon">🕹️</span><span class="theme-name">Synthwave</span></button>
+            <button class="theme-btn" data-theme="NeonDemon"><span class="theme-icon">😈</span><span class="theme-name">NeonDemon</span></button>
         </div>
+
+        <!-- Recording Status Pill (Top Middle) -->
+        <div id="recordingStatusPill" class="status-pill" style="display: none;">
+            <span class="status-dot"></span>
+            <span id="recordingStatusText">Starting...</span>
+        </div>
+
+        <!-- Record Button (Bottom Middle) -->
+        <button id="recordBtn" class="record-btn">
+            <span class="record-icon"></span>
+            <span class="record-text">Record</span>
+        </button>
     </div>
 
-    <script>
-        // Initialize theme from server
-        async function initializeTheme() {
-            try {
-                const response = await fetch('/get_theme');
-                const data = await response.json();
-                updateActiveThemeButton(data.theme);
-            } catch (error) {
-                console.error('Failed to get theme:', error);
-            }
-        }
-
-        // Update theme when button is clicked
-        document.querySelectorAll('.theme-btn').forEach(button => {
-            button.addEventListener('click', async function() {
-                const theme = this.dataset.theme;
-                
-                try {
-                    const response = await fetch('/update_theme', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ theme: theme })
-                    });
-                    
-                    const data = await response.json();
-                    
-                    if (data.status === 'success') {
-                        updateActiveThemeButton(theme);
-                    }
-                } catch (error) {
-                    console.error('Failed to update theme:', error);
-                }
-            });
-        });
-
-        // Update active theme button styling
-        function updateActiveThemeButton(theme) {
-            document.querySelectorAll('.theme-btn').forEach(btn => {
-                if (btn.dataset.theme === theme) {
-                    btn.classList.add('active');
-                } else {
-                    btn.classList.remove('active');
-                }
-            });
-        }
-
-        // Update stats periodically
-        async function updateStats() {
-            try {
-                const response = await fetch('/get_stats');
-                const data = await response.json();
-                
-                document.getElementById('fps').textContent = data.fps;
-                document.getElementById('handCount').textContent = data.hand_count;
-                
-                // Update gesture and spread for first hand
-                if (data.hand_count > 0) {
-                    document.getElementById('gesture').textContent = data.gestures[0];
-                    document.getElementById('spread').textContent = Math.round(data.spreads[0]) + '%';
-                    
-                    // Update gesture color based on gesture type
-                    const gestureElement = document.getElementById('gesture');
-                    gestureElement.classList.remove('gesture-pinch', 'gesture-fist', 'gesture-open');
-                    
-                    if (data.gestures[0] === 'PINCH!') {
-                        gestureElement.classList.add('gesture-pinch');
-                    } else if (data.gestures[0] === 'Fist') {
-                        gestureElement.classList.add('gesture-fist');
-                    } else if (data.gestures[0] === 'Open Hand') {
-                        gestureElement.classList.add('gesture-open');
-                    }
-                } else {
-                    document.getElementById('gesture').textContent = 'Unknown';
-                    document.getElementById('spread').textContent = '0%';
-                }
-            } catch (error) {
-                console.error('Failed to update stats:', error);
-            }
-        }
-
-        // Initialize
-        window.addEventListener('DOMContentLoaded', () => {
-            initializeTheme();
-            // Update stats every 100ms
-            setInterval(updateStats, 100);
-        });
-    </script>
+    <!-- Main Engine -->
+    <script src="{{ url_for('static', filename='main.js') }}" type="module"></script>
 </body>
 </html>
